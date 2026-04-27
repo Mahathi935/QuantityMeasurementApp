@@ -1,13 +1,13 @@
 /**
  * QuantityMeasurementApp
  *
- * UC6: Addition of Length Units
+ * UC7: Addition with Target Unit Specification
  *
- * Adds two quantities (same category) and returns result
- * in unit of first operand.
+ * Adds two quantities and returns result
+ * in explicitly specified target unit.
  *
  * @author Mahathi
- * @version 1.0
+ * @version 1.1
  */
 
 public class QuantityMeasurementApp {
@@ -51,20 +51,35 @@ public class QuantityMeasurementApp {
             return unit.toFeet(value);
         }
 
-        // -------- ADD METHOD --------
+        // -------- UC6 METHOD --------
         public Quantity add(Quantity other) {
+            if (other == null) {
+                throw new IllegalArgumentException("Second operand cannot be null");
+            }
+
+            double sumInFeet = this.toFeet() + other.toFeet();
+            double resultValue = this.unit.fromFeet(sumInFeet);
+
+            return new Quantity(resultValue, this.unit);
+        }
+
+        // -------- UC7 METHOD (NEW) --------
+        public Quantity add(Quantity other, LengthUnit targetUnit) {
 
             if (other == null) {
                 throw new IllegalArgumentException("Second operand cannot be null");
+            }
+            if (targetUnit == null) {
+                throw new IllegalArgumentException("Target unit cannot be null");
             }
 
             // Step 1: convert both to base (feet)
             double sumInFeet = this.toFeet() + other.toFeet();
 
-            // Step 2: convert back to THIS unit
-            double resultValue = this.unit.fromFeet(sumInFeet);
+            // Step 2: convert to TARGET unit
+            double resultValue = targetUnit.fromFeet(sumInFeet);
 
-            return new Quantity(resultValue, this.unit);
+            return new Quantity(resultValue, targetUnit);
         }
 
         @Override
@@ -79,21 +94,22 @@ public class QuantityMeasurementApp {
         Quantity q1 = new Quantity(1.0, LengthUnit.FEET);
         Quantity q2 = new Quantity(12.0, LengthUnit.INCH);
 
+        // UC6
         System.out.println(q1.add(q2)); // 2 feet
 
-        Quantity q3 = new Quantity(12.0, LengthUnit.INCH);
-        Quantity q4 = new Quantity(1.0, LengthUnit.FEET);
+        // UC7
+        System.out.println(q1.add(q2, LengthUnit.FEET));   // 2 feet
+        System.out.println(q1.add(q2, LengthUnit.INCH));   // 24 inches
+        System.out.println(q1.add(q2, LengthUnit.YARD));   // ~0.667 yard
 
-        System.out.println(q3.add(q4)); // 24 inches
+        Quantity q3 = new Quantity(1.0, LengthUnit.YARD);
+        Quantity q4 = new Quantity(3.0, LengthUnit.FEET);
 
-        Quantity q5 = new Quantity(1.0, LengthUnit.YARD);
-        Quantity q6 = new Quantity(3.0, LengthUnit.FEET);
+        System.out.println(q3.add(q4, LengthUnit.YARD));   // 2 yards
 
-        System.out.println(q5.add(q6)); // 2 yards
+        Quantity q5 = new Quantity(2.54, LengthUnit.CENTIMETER);
+        Quantity q6 = new Quantity(1.0, LengthUnit.INCH);
 
-        Quantity q7 = new Quantity(2.54, LengthUnit.CENTIMETER);
-        Quantity q8 = new Quantity(1.0, LengthUnit.INCH);
-
-        System.out.println(q7.add(q8)); // ~5.08 cm
+        System.out.println(q5.add(q6, LengthUnit.CENTIMETER)); // ~5.08 cm
     }
 }
